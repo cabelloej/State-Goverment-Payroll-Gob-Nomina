@@ -1,0 +1,248 @@
+@ 4,0 CLEAR to 16,79
+@ 5,0 TO 16,79
+@ 04,00 SAY "HISTORICO INDIVIDUAL (NOM.VERTICAL)"
+@ 06,2 SAY "CEDULA                      :"
+@ 08,2 SAY "NOMBRE                      :"
+@ 10,2 SAY "DESDE EL PERD. QUE CIERRA EL:"
+@ 12,2 SAY "HASTA EL PERD. QUE CIERRA EL:"
+@ 14,2 SAY "SALIDA (M/I)                :"
+SAVE SCRE TO SCREPRI
+STORE .F. TO WFLAGSCRE
+STORE .T. TO WCARGANDO
+DO WHILE WCARGANDO
+   IF WFLAGSCRE
+      @ 0,0 CLEAR
+      RESTORE SCRE FROM SCREPRI
+   ELSE
+      STORE .T. TO WFLAGSCRE
+   ENDIF
+   SELECT 1
+   USE APPERSON INDEX APPERSO1
+   @ 06,33 GET WCEDULA
+   READ
+   IF WCEDULA = SPACE(12) .OR.READKEY()=12.OR.READKEY()=268
+      CLOSE DATA
+      CLOSE INDEX
+      EXIT
+   ENDIF
+   SELECT 1
+   FIND &WCEDULA
+   IF EOF()
+      STORE "NO REGISTRADA, VERIFIQUE." TO MES
+      DO AVISO WITH MES
+      LOOP
+   ENDIF
+   STORE APELLIDOS  TO XAPELLIDOS
+   STORE NOMBRES    TO XNOMBRES
+   STORE SPACE(2)   TO XCENTRO
+   @ 08,33 SAY RTRIM(XAPELLIDOS)+", "+XNOMBRES
+   STORE CTOD("  -  -  ") TO WDESDE
+   STORE CTOD("  -  -  ") TO WHASTA 
+   @ 10,33 GET WDESDE
+   @ 12,33 GET WHASTA
+   READ
+   IF WHASTA<WDESDE
+      STORE "ERROR EN FECHAS, VERIFIQUE." TO MES
+      DO AVISO WITH MES
+      LOOP
+   ENDIF
+   STORE "SELECCIONE LA SALIDA: (M)ONITOR, (I)MPRESORA" TO TEX
+   STORE "MI" TO WCH
+   DO PREGUNTA
+   IF READKEY()=12 .OR. READKEY()=268
+      LOOP
+   ENDIF
+   STORE WCH TO WSALIDA
+   IF WSALIDA = "I"
+      STORE 33 TO WSALTO
+      STORE "IMPRESORA" TO WSALIDES
+   ELSE
+      STORE 20 TO WSALTO
+      STORE "MONITOR" TO WSALIDES
+   ENDIF
+   @ 14,33 SAY WSALIDES
+   STORE "OPCIONES: (C)ONTINUAR, (R)ECHAZAR" TO TEX
+   STORE "CR" TO WCH
+   DO PREGUNTA
+   IF WCH = "R"
+      LOOP
+   ENDIF
+   SELECT 1
+   USE APHISGEN INDEX APHISGE1
+   SELECT 2
+   USE APHISCON INDEX APHISCO1
+   SELECT 3
+   USE APCON INDEX APCON
+   SELECT 4
+   USE APGRUPOS INDEX APGRUPOS
+   SELECT 5
+   USE APNOMINA INDEX APNOMINA
+   SELECT 6
+   USE APCARGOS INDEX APCARGOS
+   SELECT 7
+   USE APBANCOS INDEX APBANCOS
+   IF WSALIDA = "I"
+      SET DEVI TO PRINT
+      @ PROW(), PCOL() SAY CHR(18)
+      @ PROW(), PCOL() SAY CHR(27)+CHR(67)+CHR(33)
+      EJECT
+   ELSE
+      @ 0,0 CLEAR
+   ENDIF
+   STORE 0 TO WCOUNTSOB
+   SELECT 1
+   FIND &WCEDULA
+   DO WHILE .NOT. EOF() .AND. CEDULA = WCEDULA
+      IF FECHA2 < WDESDE .OR. FECHA2 > WHASTA
+         SELECT 1
+         SKIP
+         LOOP
+      ENDIF
+      STORE WCOUNTSOB + 1 TO WCOUNTSOB
+      STORE CEDULA  TO  XCEDULA
+      STORE FECHA1  TO  XFECHA1
+      STORE FECHA2  TO  XFECHA2
+      STORE GRUPO   TO  XGRUPO
+      STORE NOMINA  TO  XNOMINA
+      STORE DIRE    TO  XDIRE
+      STORE DEPA    TO  XDEPA
+      STORE SECC    TO  XSECC
+      STORE CARGO   TO  XCARGO
+      STORE SUELDOH TO  XSUELDOH
+      STORE SUELDOD TO  XSUELDOD
+      STORE SUELDOP TO  XSUELDOP
+      STORE TIPO    TO  XTIPO
+      STORE 100     TO  WLINE
+      STORE 0       TO  WTOTASI
+      STORE 0       TO  WTOTBON
+      STORE 0       TO  WTOTNBON
+      STORE 0       TO  WTOTDEC
+      STORE 0       TO  WTOTLIQ
+      STORE XCEDULA+STR(YEAR(XFECHA2))+STR(MONTH(XFECHA2))+STR(DAY(XFECHA2)) TO WCLAVE2
+      SELECT 2
+      FIND &WCLAVE2
+      DO WHILE .NOT. EOF() .AND. CEDULA=XCEDULA .AND. FECHA2=XFECHA2
+         STORE CONCEPTO TO XCONCEPTO
+         STORE CANTIDAD TO XCANTIDAD
+         STORE MONTO    TO XMONTO
+         STORE SALDO    TO XSALDO
+         STORE ORIGEN   TO XORIGEN
+         SELECT 3
+         FIND &XCONCEPTO
+         IF EOF()
+            STORE "NO REGISTRADO" TO XCONCEDES
+            STORE "****"          TO XCONCEUND
+            STORE .F.             TO XFLAGCON
+         ELSE
+            STORE DESCRI          TO XCONCEDES
+            STORE UNIDAD          TO XCONCEUND
+            STORE .T.             TO XFLAGCON
+         ENDIF
+         IF XGRUPO <> SPACE(2)
+            SELECT 4
+            FIND &XGRUPO
+            IF EOF()
+               STORE "NO REGISTRADO" TO WGRUPODES
+            ELSE
+               STORE DESCRI          TO WGRUPODES
+            ENDIF
+         ELSE
+            STORE "NO DEFINIDO" TO WGRUPODES
+         ENDIF
+         IF XNOMINA <> SPACE(2)
+            STORE XGRUPO+XNOMINA TO XCLAVENOM
+            SELECT 5
+            FIND &XCLAVENOM
+            IF EOF()
+               STORE "NO REGISTRADO" TO WNOMIDES
+            ELSE
+               STORE DESCRI          TO WNOMIDES
+            ENDIF
+         ELSE
+            STORE "NO DEFINIDO" TO WNOMIDES
+         ENDIF
+         IF XCARGO <> SPACE(6)
+            SELECT 6
+            FIND &XCARGO
+            IF EOF()
+               STORE "NO REGISTRADO" TO XCARGODES
+            ELSE
+               STORE DESCRI          TO XCARGODES
+            ENDIF
+         ELSE
+            STORE "NO DEFINIDO" TO XCARGODES
+         ENDIF
+         IF XCENTRO <> SPACE(2)
+            SELECT 7
+            FIND &XCENTRO
+            IF EOF()
+               STORE "NO REGISTRADO" TO XCENTRODES
+            ELSE
+               STORE DESCRI          TO XCENTRODES
+            ENDIF
+         ELSE
+            STORE    "NO DEFINIDO"   TO XCENTRODES
+         ENDIF
+         SELECT 2
+         STORE WLINE + 1 TO WLINE
+         IF WLINE > WSALTO
+            IF WSALIDA = "M" .AND. WCOUNTSOB > 1
+               STORE "OPRIMA <ENTER> PARA CONTINUAR, <ESC> PARA SALIR" TO MES
+               DO AVISO WITH MES
+               IF READKEY()=12.OR.READKEY()=268
+                  CLOSE DATA
+                  CLOSE INDEX
+                  RETURN
+               ENDIF                  
+               @ 0,0 CLEAR
+            ENDIF
+            DO HD0402A
+         ENDIF
+         @ WLINE,00  SAY XCONCEPTO
+         @ WLINE,05  SAY XCONCEDES
+         @ WLINE,31  SAY XCONCEUND
+         @ WLINE,37  SAY XCANTIDAD  PICTURE "###.##"
+         IF XFLAGCON
+            IF APCON->GRUPO = 1
+               @ WLINE,43  SAY XMONTO  PICTURE "#######.##"
+            ELSE
+               IF APCON->GRUPO = 2
+                  @ WLINE,53 SAY XMONTO PICTURE "#######.##"
+               ENDIF
+            ENDIF
+            IF XSALDO > 0
+               @ WLINE,66 SAY XSALDO PICTURE "#######.##"
+            ENDIF
+            DO TOTALIZA
+         ENDIF
+         SELECT 2
+         SKIP
+      ENDDO
+      IF WTOTASI>0 .OR. WTOTDEC > 0
+         STORE WLINE+1 TO WLINE
+         @ WLINE,00  SAY "T O T A L E S   ASIG./DEC./COBRAR:"
+         @ WLINE,42  SAY WTOTASI  PICTURE "########.##"
+         @ WLINE,52  SAY WTOTDEC  PICTURE "########.##"
+         @ WLINE,66  SAY WTOTLIQ  PICTURE "########.##"
+         IF WSALIDA = "I"
+            @ WLINE,90 SAY "SALDO DEL PAGO: Bs. "+LTRIM(STR(WTOTLIQ,12,2))
+         ENDIF
+      ENDIF
+      SELECT 1
+      SKIP
+   ENDDO
+   IF WSALIDA = "M"
+      STORE "OPRIMA <ENTER> PARA FINALIZAR" TO MES
+      DO AVISO WITH MES
+   ELSE
+      @ PROW(), PCOL() SAY CHR(27)+CHR(67)+CHR(66)
+      @ PROW(), PCOL() SAY CHR(18)
+      EJECT
+      SET DEVI TO SCRE
+   ENDIF
+   CLOSE DATA
+   CLOSE INDEX
+ENDDO
+CLOSE DATA
+CLOSE INDEX
+RETURN

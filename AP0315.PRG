@@ -1,0 +1,19 @@
+SAVE SCRE TO SCRE4
+store .t. to wsub4
+do while wsub4
+   RESTORE SCREEN FROM SCRE4
+   @ 04,00 clear to 07,23
+   @ 04,00       to 07,23
+   @ 04,01 SAY    "HISTORICO INDIVIDUAL"
+   @ 05,01 PROMPT "NOMINA VERTICAL       "
+   @ 06,01 PROMPT "NOMINA CONCEPTUAL     "
+   MENU TO WSUBSUB4
+   DO CASE
+   CASE WSUBSUB4 = 1
+        DO AP0315A
+   CASE WSUBSUB4 = 2
+        DO AP0315B
+   CASE WSUBSUB4 = 0
+        EXIT
+   ENDCASE
+enddo

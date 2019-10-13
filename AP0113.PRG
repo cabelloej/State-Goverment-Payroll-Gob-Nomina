@@ -1,0 +1,27 @@
+SAVE SCRE TO SCRE4
+store .t. to wsub4
+do while wsub4
+   RESTORE SCREEN FROM SCRE4
+   @ 04,00 clear to 09,23
+   @ 04,00       to 09,23
+   @ 04,01 SAY    "FIJAR CONCEPTO GENERAL"
+   @ 05,01 PROMPT "INCLUIR               "
+   @ 06,01 PROMPT "MODIFICAR CANTIDAD    "
+   @ 07,01 PROMPT "MODIFICAR FACTOR      "
+   @ 08,01 PROMPT "ELIMINAR              "
+
+   MENU TO WSUBSUB4
+   DO CASE
+   CASE WSUBSUB4 = 1
+        DO AP0113A
+   CASE WSUBSUB4 = 2
+        DO AP0113B
+   CASE WSUBSUB4 = 3
+        DO AP0113C
+   CASE WSUBSUB4 = 4
+        DO AP0113D
+   CASE WSUBSUB4 = 0
+        EXIT
+   ENDCASE
+enddo
+

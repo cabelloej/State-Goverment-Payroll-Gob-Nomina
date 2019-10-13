@@ -1,0 +1,181 @@
+SELECT 1
+USE APGRUPOS INDEX APGRUPOS
+SELECT 2
+USE APNOMINA INDEX APNOMINA
+STORE .T. TO WCARGANDO
+DO WHILE WCARGANDO
+   SELECT 1
+   @ 4,0 CLEAR to 16,55
+   @ 5,0 TO 16,55
+   @ 04,00 SAY "NOMINAS"
+   @ 06,2 SAY "GRUPO  :"
+   @ 08,2 SAY "NOMINA :"
+   @ 10,2 SAY "LAPSO  :"
+   @ 12,2 SAY "PERIODO:"
+   @ 14,2 SAY "ESTADO :"
+
+   @ 06,10 GET WGRUPO
+   READ
+   IF WGRUPO = SPACE(2) .OR.READKEY()=12.OR.READKEY()=268
+      EXIT
+   ENDIF
+   SELECT 1
+   FIND &WGRUPO
+   IF EOF()
+      STORE "GRUPO NO REGISTRADO, VERIFIQUE" TO MES
+      DO AVISO WITH MES
+      LOOP
+   ENDIF
+   @ 06,20 SAY DESCRI
+
+   @ 08,10 GET WNOMINA
+   READ
+   IF WNOMINA = SPACE(2) .OR.READKEY()=12.OR.READKEY()=268
+      EXIT
+   ENDIF
+   STORE WGRUPO+WNOMINA TO WCLAVE
+   SELECT 2
+   FIND &WCLAVE
+   IF EOF()
+      STORE .T. TO WINGRESA
+      STORE .T. TO WMODIFICA
+      STORE "NOMINA NO REGISTRADA, INGRESAR ? (S/N)" TO TEX
+      STORE "SN" TO WCH
+      DO PREGUNTA
+      IF WCH = "N"
+         LOOP
+      ENDIF
+      STORE SPACE(25)        TO WDESCRI
+      STORE 0                TO WLAPSO
+      STORE 0                TO WESTADO
+      STORE CTOD("  -  -  ") TO WAPER1
+      STORE CTOD("  -  -  ") TO WAPER2
+   ELSE
+      STORE .F.              TO WINGRESA
+      STORE .F.              TO WMODIFICA
+      STORE DESCRI           TO WDESCRI
+      STORE LAPSO            TO WLAPSO
+      STORE ESTADO           TO WESTADO
+      STORE APER1            TO WAPER1
+      STORE APER2            TO WAPER2
+   ENDIF
+   STORE SPACE(20) TO WESTADODES
+   DO ESTADO
+   @ 08, 20 SAY WDESCRI
+   @ 10, 10 SAY WLAPSO PICTURE "##"
+   @ 12, 10 SAY WAPER1
+   @ 12, 25 SAY WAPER2
+   @ 14, 10 SAY WESTADO PICTURE "#"
+   @ 14, 20 SAY WESTADODES
+   IF .NOT. WMODIFICA
+      STORE "OPCIONES: (M)ODIFICAR, (E)LIMINAR, (S)ALIR" TO TEX
+      STORE "SME" TO WCH
+      DO PREGUNTA
+      STORE WCH TO WRESP
+      IF WRESP= "S"
+         LOOP
+      ELSE
+         IF WRESP= "M"
+            STORE .T. TO WMODIFICA
+         ELSE
+            STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+            STORE "NS" TO WCH
+            DO PREGUNTA
+            IF WCH = "N"
+               LOOP
+            ELSE
+               *** CHEQUEAR QUE EL GRUPO ESTE SIN CONEXIONES EN APNOMINA.DBF
+                SELECT 2
+                DELETE
+                LOOP
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+
+   IF WMODIFICA
+      *** DESCRIPCION
+      STORE .T. TO WACT
+      DO WHILE WACT
+         STORE "INGRESE LA DESCRIPCION DEL GRUPO" TO MES
+         DO MENSAJE WITH MES
+         @ 8,20 GET WDESCRI
+         READ
+         IF READKEY()=12.OR.READKEY()=268
+            STORE .F. TO WCARGANDO
+            EXIT
+         ENDIF
+         IF WDESCRI <> SPACE(25)
+            EXIT
+         ENDIF
+      ENDDO
+      IF .NOT. WCARGANDO
+         EXIT
+      ENDIF
+      *** LAPSO
+      STORE .T. TO WACT
+      DO WHILE WACT
+         STORE "INGRESE EL LAPSO DE PAGO" TO MES
+         DO MENSAJE WITH MES
+         @ 10,10 GET WLAPSO PICTURE "##"
+         READ
+         IF READKEY()=12.OR.READKEY()=268
+            STORE .F. TO WCARGANDO
+            EXIT
+         ENDIF
+         IF WLAPSO > 0
+            EXIT
+         ENDIF
+      ENDDO
+      IF .NOT. WCARGANDO
+         EXIT
+      ENDIF
+      *** ESTADO
+      IF SYS(30) = "" .OR. SYS(30) = "eduardo"
+         STORE .T. TO WACT
+         DO WHILE WACT
+            STORE "0=CERRADA, 1=CARG.VAR, 2=ORDIN, 3=PRESUP, 4=CONCEP, 5=VERT, 6=BANCA, 7=RESM." TO MES
+            DO MENSAJE WITH MES
+            @ 14,10 GET WESTADO PICTURE "#"
+            READ
+            IF READKEY()=12.OR.READKEY()=268
+               STORE .F. TO WCARGANDO
+               EXIT
+            ENDIF
+            IF WESTADO >= 0 .AND. WESTADO <= 7
+               EXIT
+            ENDIF
+            STORE SPACE(20) TO WESTADODES
+            DO ESTADO
+            @ 14,20 SAY WESTADODES
+         ENDDO
+      ENDIF
+      IF .NOT. WCARGANDO
+         EXIT
+      ENDIF
+   ENDIF
+   STORE "CONFORME ? (S/N)" TO TEX
+   STORE "SN" TO WCH
+   DO PREGUNTA
+   IF WCH = "N"
+      LOOP
+   ENDIF
+   IF WINGRESA
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE GRUPO  WITH WGRUPO
+      REPLACE NOMINA WITH WNOMINA
+   ENDIF
+   DO RECLOC
+   REPLACE DESCRI   WITH WDESCRI
+   REPLACE LAPSO    WITH WLAPSO
+   REPLACE ESTADO   WITH WESTADO
+   FLUSH
+   UNLOCK
+ENDDO
+CLOSE DATA
+CLOSE INDEX
+RETURN
+

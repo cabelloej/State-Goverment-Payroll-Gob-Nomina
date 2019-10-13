@@ -1,0 +1,19 @@
+SAVE SCRE TO SCRE4
+store .t. to wsub4
+do while wsub4
+   RESTORE SCREEN FROM SCRE4
+   @ 04,00 clear to 07,23
+   @ 04,00       to 07,23
+   @ 04,01 SAY    "MODELOS ESPECIALES"
+   @ 05,01 PROMPT "AHORRO HABITACIONAL   "
+   @ 06,01 PROMPT "CAJA DE AHORROS       "
+   MENU TO WSUBSUB4
+   DO CASE
+   CASE WSUBSUB4 = 1
+        DO AP0318A
+   CASE WSUBSUB4 = 2
+        DO AP0318B
+   CASE WSUBSUB4 = 0
+        EXIT
+   ENDCASE
+enddo

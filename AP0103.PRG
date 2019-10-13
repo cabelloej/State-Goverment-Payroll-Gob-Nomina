@@ -1,0 +1,167 @@
+SELECT 1
+USE APUBICA INDEX APUBICA
+STORE "00"     TO WDIRE
+STORE "00"     TO WDEPA
+STORE "000"     TO WSECC
+STORE .T. TO WCARGANDO
+DO WHILE WCARGANDO
+   @ 4,0 CLEAR to 12,55
+   @ 5,0 TO 12,55
+   @ 04,00 SAY "UBICACION ADMINISTRATIVA"
+   @ 06,2 SAY "DIRECCION-PROGRAMA:"
+   @ 08,2 SAY "DEPTTO-MUNICIPIO  :"
+   @ 10,2 SAY "SECCION-UNIDAD    :"
+   @ 06,21 GET WDIRE
+   *@ 08,21 GET WDEPA
+   *@ 10,21 GET WSECC
+   READ
+   IF WDIRE=SPACE(2) .OR. WDIRE="00" .OR.READKEY()=12.OR.READKEY()=268
+      EXIT
+   ENDIF
+   STORE WDIRE+"00"+"000" TO WCLAVE
+   SELECT 1
+   FIND &WCLAVE
+   IF EOF()
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE DIRE WITH WDIRE
+      REPLACE DEPA WITH "00"
+      REPLACE SECC WITH "000"
+      FLUSH
+      @ 06,30 GET DESCRI
+      READ
+      IF DESCRI = SPACE(25)
+         DELETE
+      ENDIF
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+   ELSE
+      do recloc
+      @ 06,30 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+      IF DESCRI = "*ELIMINA*" .OR. DESCRI = SPACE(25)
+         STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+         STORE "NS" TO WCH
+         DO PREGUNTA
+         IF WCH = "N"
+            LOOP
+         ELSE
+            DO FILLOC
+            DELETE
+            UNLOCK
+            LOOP
+         ENDIF
+      ENDIF
+      FLUSH
+   ENDIF
+   @ 08,21 GET WDEPA
+   READ
+   IF WDEPA=SPACE(2) .OR. WDEPA="00" .OR.READKEY()=12.OR.READKEY()=268
+      LOOP
+   ENDIF
+   STORE WDIRE+WDEPA+"000" TO WCLAVE
+   SELECT 1
+   FIND &WCLAVE
+   IF EOF()
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE DIRE WITH WDIRE
+      REPLACE DEPA WITH WDEPA
+      REPLACE SECC WITH "000"
+      FLUSH
+      @ 08,30 GET DESCRI
+      READ
+      IF DESCRI = SPACE(25)
+         DELETE
+      ENDIF
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+   ELSE
+      do recloc
+      @ 08,30 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+      IF DESCRI = "*ELIMINA*" .OR. DESCRI = SPACE(25)
+         STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+         STORE "NS" TO WCH
+         DO PREGUNTA
+         IF WCH = "N"
+            LOOP
+         ELSE
+            DO FILLOC
+            DELETE
+            UNLOCK
+            LOOP
+         ENDIF
+      ENDIF
+      FLUSH
+   ENDIF
+   @ 10,21 GET WSECC
+   READ
+   IF WSECC=SPACE(2) .OR. WSECC="000" .OR.READKEY()=12.OR.READKEY()=268
+      LOOP
+   ENDIF
+   STORE WDIRE+WDEPA+WSECC TO WCLAVE
+   SELECT 1
+   FIND &WCLAVE
+   IF EOF()
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE DIRE WITH WDIRE
+      REPLACE DEPA WITH WDEPA
+      REPLACE SECC WITH WSECC
+      FLUSH
+      @ 10,30 GET DESCRI
+      READ
+      IF DESCRI = SPACE(25)
+         DELETE
+      ENDIF
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+   ELSE
+      do recloc
+      @ 10,30 GET DESCRI
+      READ
+      unlock
+      IF READKEY()=12.OR.READKEY()=268
+         LOOP
+      ENDIF
+      IF DESCRI = "*ELIMINA*" .OR. DESCRI = SPACE(25)
+         STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+         STORE "NS" TO WCH
+         DO PREGUNTA
+         IF WCH = "N"
+            LOOP
+         ELSE
+            DO FILLOC
+            DELETE
+            UNLOCK
+            LOOP
+         ENDIF
+      ENDIF
+      FLUSH
+   ENDIF
+ENDDO
+CLOSE DATA
+CLOSE INDEX
+RETURN
+

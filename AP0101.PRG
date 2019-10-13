@@ -1,0 +1,99 @@
+SELECT 1
+USE APGRUPOS INDEX APGRUPOS
+STORE .T. TO WCARGANDO
+DO WHILE WCARGANDO
+   @ 4,0 CLEAR to 8,55
+   @ 5,0 TO 08,55
+   @ 04,00 SAY "GRUPOS DE NOMINAS"
+   @ 06,2 SAY "CODIGO:"
+   @ 06,10 GET WGRUPO
+   READ
+   IF WGRUPO = SPACE(2) .OR.READKEY()=12.OR.READKEY()=268
+      EXIT
+   ENDIF
+   SELECT 1
+   FIND &WGRUPO
+   IF EOF()
+      STORE .T. TO WINGRESA
+      STORE .T. TO WMODIFICA
+      STORE "GRUPO NO REGISTRADO, INGRESAR ? (S/N)" TO TEX
+      STORE "SN" TO WCH
+      DO PREGUNTA
+      IF WCH = "N"
+         LOOP
+      ENDIF
+      STORE SPACE(25)        TO WDESCRI
+   ELSE
+      STORE .F. TO WINGRESA
+      STORE .F. TO WMODIFICA
+      STORE DESCRI           TO WDESCRI
+   ENDIF
+   @ 6, 20 SAY WDESCRI
+   IF .NOT. WMODIFICA
+      STORE "OPCIONES: (M)ODIFICAR, (E)LIMINAR, (S)ALIR" TO TEX
+      STORE "SME" TO WCH
+      DO PREGUNTA
+      STORE WCH TO WRESP
+      IF WRESP= "S"
+         LOOP
+      ELSE
+         IF WRESP= "M"
+            STORE .T. TO WMODIFICA
+         ELSE
+            STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+            STORE "NS" TO WCH
+            DO PREGUNTA
+            IF WCH = "N"
+               LOOP
+            ELSE
+                *** CHEQUEAR QUE EL GRUPO ESTE SIN CONEXIONES EN APNOMINA.DBF
+                SELECT 1
+                DELETE
+                LOOP
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+
+   IF WMODIFICA
+      *** DESCRIPCION
+      STORE .T. TO WACT
+      DO WHILE WACT
+         STORE "INGRESE LA DESCRIPCION DEL GRUPO" TO MES
+         DO MENSAJE WITH MES
+         @ 6,20 GET WDESCRI
+         READ
+         IF READKEY()=12.OR.READKEY()=268
+            STORE .F. TO WCARGANDO
+            EXIT
+         ENDIF
+         IF WDESCRI <> SPACE(25)
+            EXIT
+         ENDIF
+      ENDDO
+      IF .NOT. WCARGANDO
+         EXIT
+      ENDIF
+   ENDIF
+   STORE "CONFORME ? (S/N)" TO TEX
+   STORE "SN" TO WCH
+   DO PREGUNTA
+   IF WCH = "N"
+      LOOP
+   ENDIF
+   IF WINGRESA
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE GRUPO  WITH WGRUPO
+   ENDIF
+   DO RECLOC
+   REPLACE DESCRI   WITH WDESCRI
+   FLUSH
+   UNLOCK
+ENDDO
+CLOSE DATA
+CLOSE INDEX
+RETURN
+

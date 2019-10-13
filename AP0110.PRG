@@ -1,0 +1,238 @@
+SELECT 1 
+USE APPERSON INDEX APPERSO1,APPERSO2,APPERSO3,APPERSO4
+SELECT 2
+USE APCONPER INDEX APCONPER
+SELECT 3
+USE APPAGGEN INDEX APPAGGE1,APPAGGE2
+SELECT 4
+USE APPAGCON INDEX APPAGCO1,APPAGCO2
+SELECT 5
+USE APHISGEN INDEX APHISGE1,APHISGE2
+SELECT 6
+USE APHISCON INDEX APHISCO1,APHISCO2
+STORE .T. TO PER
+DO WHILE PER
+   SELECT 1
+   STORE 04 TO LINE
+   STORE 0 TO COL
+   @ LINE,COL CLEAR
+   @ LINE,COL TO LINE+17,COL+79 DOUBLE
+   STORE "INGRESE LOS SIGUIENTES DATOS PERSONALES" TO MES
+   DO MENSAJE WITH MES
+   @ LINE,COL+32 SAY "DATOS PERSONALES"
+   @ 05,1 SAY   "CEDULA ...............:"
+   @ 06,1 SAY   "NOMBRES ..............:"
+   @ 07,1 SAY   "APELLIDOS ............:"
+   @ 08,1 SAY   "DIRECCION ............:"
+
+   @ 10,1 SAY   "TELEFONO .............:"
+   @ 11,1 SAY   "SEXO .................:"
+   @ 12,1 SAY   "ESTADO CIVIL .........:"
+   @ 13,1 SAY   "NACIONALIDAD .........:"
+   @ 14,1 SAY   "LUGAR NACIMIENTO .....:"
+   @ 15,1 SAY   "FECHA NACIMIENTO  ....:"
+   @ 16,1 SAY   "ENTIDAD ..............:"
+   @ 17,1 SAY   "MUNICIPIO ............:"
+   @ 18,1 SAY   "PARROQUIA ............:"
+   @ 19,1 SAY   "LIBRETA MILITAR No. ..:"
+   @ 20,1 SAY   "S.S.O. No. ...........:"
+   @ 5,25 GET WCEDULA
+   READ
+   IF WCEDULA = SPACE(12) .OR. READKEY()=12 .OR. READKEY()=268
+      EXIT
+   ENDIF
+   FIND &WCEDULA
+   IF EOF()
+      STORE "CEDULA NO REGISTRADA, INGRESAR ? (S/N)" TO TEX
+      STORE "SN" TO WCH
+      DO PREGUNTA
+      IF WCH = "N"
+         LOOP
+      ENDIF
+      STORE .T. TO WINGRESA
+      STORE .T. TO WMODIFICA
+      STORE SPACE(20) TO WNOMBRES
+      STORE SPACE(20) TO WAPELLIDOS
+      STORE SPACE(40) TO WDIREC1
+      STORE SPACE(40) TO WDIREC2
+      STORE SPACE(20) TO WLUGNAC
+      STORE SPACE(20) TO WMUNICI
+      STORE SPACE(20) TO WDISTRI
+      STORE SPACE(20) TO WESTADO
+      STORE SPACE(20) TO WMILITA
+      STORE SPACE(20) TO WSSONO
+      STORE SPACE(1)  TO WSEXO
+      STORE SPACE(11) TO WTELEFONO
+      STORE SPACE(1)  TO WNACION
+      STORE SPACE(1)  TO WEDOCIVIL
+      STORE SPACE(20) TO WSSONO
+      STORE CTOD("  -  -  ") TO WFECNAC
+   ELSE
+      STORE .F. TO WINGRESA
+      STORE .F. TO WMODIFICA
+      STORE NOMBRES TO WNOMBRES
+      STORE APELLIDOS TO WAPELLIDOS
+      STORE DIRECCION1 TO WDIREC1
+      STORE DIRECCION2 TO WDIREC2
+      STORE SEXO TO   WSEXO
+      STORE TELEFONO TO WTELEFONO
+      STORE NACIONALID TO WNACION
+      STORE EDOCIVIL TO WEDOCIVIL
+      STORE LUGARNACI TO WLUGNAC
+      STORE FECHANACI TO WFECNAC
+      STORE MUNICIPIO TO WMUNICI
+      STORE DISTRITO TO WDISTRI
+      STORE ESTADO TO WESTADO
+      STORE MILITARNU TO WMILITA
+      STORE SEGURONUM TO WSSONO
+   ENDIF
+   @ 06,25 SAY WNOMBRES
+   @ 07,25 SAY WAPELLIDOS
+   @ 08,25 SAY WDIREC1
+   @ 09,25 SAY WDIREC2
+   @ 10,25 SAY WTELEFONO
+   @ 11,25 SAY WSEXO
+   @ 12,25 SAY WEDOCIVIL
+   @ 13,25 SAY WNACION
+   @ 14,25 SAY WLUGNAC
+   @ 15,25 SAY WFECNAC
+   @ 16,25 SAY WESTADO
+   @ 17,25 SAY WDISTRI
+   @ 18,25 SAY WMUNICI
+   @ 19,25 SAY WMILITA
+   @ 20,25 SAY WSSONO
+   IF .NOT. WMODIFICA
+      STORE "OPCIONES: (M)ODIFICAR, (E)LIMINAR, (S)ALIR" TO TEX
+      STORE "SME" TO WCH
+      DO PREGUNTA
+      STORE WCH TO WRESP
+      IF WRESP= "S"
+         LOOP
+      ELSE
+         IF WRESP= "M"
+            STORE .T. TO WMODIFICA
+         ELSE
+            STORE "ESTA SEGURO QUE DESEA ELIMINAR ? (S/N)" TO TEX
+            STORE "NS" TO WCH
+            DO PREGUNTA
+            IF WCH = "N"
+               LOOP
+            ELSE
+                SELECT 1
+                DO RECLOC
+                DELETE
+                SELECT 2
+                STORE .T. TO WDELETE
+                DO WHILE WDELETE
+                   FIND &WCEDULA
+                   IF EOF() 
+                      EXIT
+                   ENDIF
+                   DO RECLOC
+                   DELETE
+                   UNLOCK
+                ENDDO    
+                SELECT 3
+                STORE .T. TO WDELETE
+                DO WHILE WDELETE
+                   FIND &WCEDULA
+                   IF EOF()
+                      EXIT
+                   ENDIF
+                   DO RECLOC
+                   DELETE
+                   UNLOCK
+                ENDDO
+                SELECT 4
+                STORE .T. TO WDELETE
+                DO WHILE WDELETE
+                   FIND &WCEDULA
+                   IF EOF()
+                      EXIT
+                   ENDIF
+                   DO RECLOC
+                   DELETE
+                   UNLOCK
+                ENDDO
+                SELECT 5
+                STORE .T. TO WDELETE  
+                DO WHILE WDELETE
+                   FIND &WCEDULA
+                   IF EOF()
+                      EXIT
+                   ENDIF
+                   DO RECLOC
+                   DELETE
+                   UNLOCK
+               ENDDO
+               SELECT 6
+               STORE .T. TO WDELETE
+               DO WHILE WDELETE
+                  FIND &WCEDULA
+                  IF EOF()
+                     EXIT
+                  ENDIF
+                  DO RECLOC
+                  DELETE
+                  UNLOCK
+               ENDDO
+               LOOP
+            ENDIF
+         ENDIF
+      ENDIF
+   ENDIF
+   IF WMODIFICA
+      @ 06,25 GET WNOMBRES
+      @ 07,25 GET WAPELLIDOS
+      @ 08,25 GET WDIREC1
+      @ 09,25 GET WDIREC2
+      @ 10,25 GET WTELEFONO
+      @ 11,25 GET WSEXO
+      @ 12,25 GET WEDOCIVIL
+      @ 13,25 GET WNACION
+      @ 14,25 GET WLUGNAC
+      @ 15,25 GET WFECNAC
+      @ 16,25 GET WESTADO
+      @ 17,25 GET WDISTRI
+      @ 18,25 GET WMUNICI
+      @ 19,25 GET WMILITA
+      @ 20,25 GET WSSONO
+      READ
+   ENDIF
+   STORE "CONFORME ? (S/N)" TO TEX
+   STORE "SN" TO WCH
+   DO PREGUNTA
+   IF WCH = "N"
+      LOOP
+   ENDIF
+   IF WINGRESA
+      DO FILLOC
+      APPEND BLANK
+      UNLOCK
+      DO RECLOC
+      REPLACE CEDULA  WITH WCEDULA
+   ENDIF
+   DO RECLOC
+   REPLACE NOMBRES WITH WNOMBRES
+   REPLACE APELLIDOS WITH WAPELLIDOS
+   REPLACE DIRECCION1 WITH WDIREC1
+   REPLACE DIRECCION2 WITH WDIREC2
+   REPLACE SEXO WITH WSEXO
+   REPLACE TELEFONO WITH WTELEFONO
+   REPLACE NACIONALID WITH WNACION
+   REPLACE EDOCIVIL WITH WEDOCIVIL
+   REPLACE LUGARNACI WITH WLUGNAC
+   REPLACE FECHANACI WITH WFECNAC
+   REPLACE MUNICIPIO WITH WMUNICI
+   REPLACE DISTRITO WITH WDISTRI
+   REPLACE ESTADO WITH WESTADO
+   REPLACE MILITARNU WITH WMILITA
+   REPLACE SEGURONUM WITH WSSONO
+   FLUSH
+   UNLOCK
+ENDDO
+CLOSE DATA
+CLOSE INDEX
+RETURN
+
+
